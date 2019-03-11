@@ -1,0 +1,75 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "com.leesc.tazza"
+        minSdkVersion 19
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    dataBinding {
+        enabled = true
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    Map<String, String> dependencies = rootProject.ext.dependencies
+
+    //android
+    implementation dependencies.appCompat
+    implementation dependencies.design
+    implementation dependencies.constraintLayout
+
+    //reactive
+    implementation dependencies.rxJava
+    implementation dependencies.rxAndroid
+
+    //network
+    implementation dependencies.retrofit
+    implementation dependencies.converterGson
+    implementation dependencies.adapterRxjava2
+    implementation dependencies.androidAsync
+
+    //architecture component
+    implementation dependencies.lifecycleExtension
+    implementation dependencies.lifecycleRuntime
+    annotationProcessor dependencies.lifecycleCompiler
+
+    //stetho
+    implementation dependencies.stetho
+
+    //stream
+    implementation dependencies.stream
+
+    //permission
+    implementation dependencies.tedPermission
+
+    //di
+    implementation dependencies.dagger
+    annotationProcessor dependencies.daggerCompiler
+    implementation dependencies.daggerAndroid
+    implementation dependencies.daggerAndroidSupport
+    annotationProcessor dependencies.daggerAndroidProccesor
+
+    //navigationGraph
+    implementation dependencies.navigationFragment
+    implementation dependencies.navigationUi
+
+}
