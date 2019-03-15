@@ -95,7 +95,7 @@ public class RoomInfoActivity extends BaseActivity<ActivityRoomInfoBinding, Room
 
     @Override
     public void handleError(Throwable throwable) {
-
+        Log.e("lsc","RoomInfoActivity handleError " + throwable.getMessage());
     }
 
 }

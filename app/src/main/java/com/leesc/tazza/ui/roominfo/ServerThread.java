@@ -26,10 +26,13 @@ public class ServerThread implements Runnable {
     public void run() {
         while (true) {
             try {
+                Log.d("lsc", "ServerThread 1");
                 socket = serverSocket.accept();
+                Log.d("lsc", "ServerThread 2");
                 streamByClient = new DataInputStream(socket.getInputStream());
+                Log.d("lsc", "ServerThread 3");
                 streamToClient = new DataOutputStream(socket.getOutputStream());
-                Log.d("lsc", "클라이언트로부터 받은 메세지 " + streamByClient.readUTF());
+                Log.d("lsc", "ServerThread 클라이언트로부터 받은 메세지 " + streamByClient.readUTF());
             } catch (IOException e) {
                 Log.e("lsc", "serversocket io exception " + e.getMessage());
             }

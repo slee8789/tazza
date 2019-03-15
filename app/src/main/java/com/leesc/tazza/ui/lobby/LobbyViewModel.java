@@ -30,6 +30,7 @@ import java.net.Socket;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 
 public class LobbyViewModel extends BaseViewModel<LobbyNavigator> {
 
@@ -54,8 +55,6 @@ public class LobbyViewModel extends BaseViewModel<LobbyNavigator> {
         this.wifiP2pManager = wifiP2pManager;
         this.channel = channel;
         this.wifiP2pService = wifiP2pService;
-
-        discover();
 
         getCompositeDisposable().add(RxEventBus.getInstance().getEvents(WifiP2pDeviceList.class)
                 .subscribeOn(schedulerProvider.io())
@@ -104,6 +103,8 @@ public class LobbyViewModel extends BaseViewModel<LobbyNavigator> {
                 )
         );
 
+        discover();
+
     }
 
     public void discover() {
@@ -131,7 +132,7 @@ public class LobbyViewModel extends BaseViewModel<LobbyNavigator> {
         getCompositeDisposable()
                 .add(clientThreadObservable(roomAddress, roomPort)
                         .subscribeOn(schedulerProvider.io())
-                        .observeOn(schedulerProvider.io())
+                        .observeOn(schedulerProvider.ui())
                         .subscribe(onNext -> {
                             Log.d("lsc", "enterRoom onNext " + onNext);
 //                            Toast.makeText(context, onNext, Toast.LENGTH_SHORT).show();
@@ -142,8 +143,8 @@ public class LobbyViewModel extends BaseViewModel<LobbyNavigator> {
                         }));
     }
 
-    DataInputStream streamByServer;
-    DataOutputStream streamToServer;
+    DataInputStream streamByServer = null;
+    DataOutputStream streamToServer = null;
 
     private Observable<String> clientThreadObservable(InetAddress serverIp, int serverPort) {
         return Observable.create(subscriber -> {
@@ -151,10 +152,13 @@ public class LobbyViewModel extends BaseViewModel<LobbyNavigator> {
 
             try {
                 Socket socket = new Socket();
+                Log.d("lsc", "clientThreadObservable create 1");
                 socket.connect(new InetSocketAddress(serverIp, serverPort), 30000);
+                Log.d("lsc", "clientThreadObservable create 2");
                 streamByServer = new DataInputStream(socket.getInputStream());
+                Log.d("lsc", "clientThreadObservable create 3");
                 streamToServer = new DataOutputStream(socket.getOutputStream());
-
+                Log.d("lsc", "clientThreadObservable create 4");
                 while (socket != null) {
                     try {
                         subscriber.onNext(streamByServer.readUTF());
@@ -164,7 +168,7 @@ public class LobbyViewModel extends BaseViewModel<LobbyNavigator> {
                 }
 
             } catch (IOException e) {
-                e.printStackTrace();
+                subscriber.onError(e);
             }
 
 
@@ -177,12 +181,22 @@ public class LobbyViewModel extends BaseViewModel<LobbyNavigator> {
         });
     }
 
+    private Single sendToClientCompletable() {
+        return Single.just("messageByClient");
+    }
+
     public void sendMessage() {
-        try {
-            streamToServer.writeUTF("messageByClient");
-        } catch (IOException e) {
-            getNavigator().handleError(e);
-        }
+        getCompositeDisposable().add(sendToClientCompletable()
+                .observeOn(schedulerProvider.io())
+                .subscribeOn(schedulerProvider.io()).subscribe(
+                        message -> {
+                            Log.d("lsc","sendMessage onNext");
+                            streamToServer.writeUTF(message.toString());
+                        },
+                        error -> {
+                            Log.d("lsc","sendMessage error " + error.toString());
+                        }
+                ));
     }
 
     @Override

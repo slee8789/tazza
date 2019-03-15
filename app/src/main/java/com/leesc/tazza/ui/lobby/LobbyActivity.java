@@ -113,7 +113,7 @@ public class LobbyActivity extends BaseActivity<ActivityLobbyBinding, LobbyViewM
 
     @Override
     public void handleError(Throwable throwable) {
-
+        Log.e("lsc","LobbyActivity handleError " + throwable.getMessage());
     }
 
 }
