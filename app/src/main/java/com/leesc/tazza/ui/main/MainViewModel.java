@@ -16,6 +16,7 @@ import com.koushikdutta.async.AsyncServerSocket;
 import com.leesc.tazza.data.DataManager;
 import com.leesc.tazza.data.model.Room;
 import com.leesc.tazza.ui.base.BaseViewModel;
+import com.leesc.tazza.ui.roominfo.ServerThread;
 import com.leesc.tazza.utils.rx.RxEventBus;
 import com.leesc.tazza.utils.rx.SchedulerProvider;
 
@@ -261,6 +262,7 @@ public class MainViewModel extends BaseViewModel<MainNavigator> {
             AsyncServer asyncServer = new AsyncServer();
 
             serverSocket = new ServerSocket(roomPort);
+            ServerThread serverThread = new ServerThread(serverSocket);
             Socket client = serverSocket.accept();
             streamByClient = new DataInputStream(client.getInputStream());
             streamToClient = new DataOutputStream(client.getOutputStream());

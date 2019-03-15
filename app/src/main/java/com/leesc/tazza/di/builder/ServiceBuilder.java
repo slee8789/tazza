@@ -1,6 +1,6 @@
 package com.leesc.tazza.di.builder;
 
-import com.leesc.tazza.service.WifiService;
+import com.leesc.tazza.service.WifiP2pService;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
@@ -9,6 +9,6 @@ import dagger.android.ContributesAndroidInjector;
 public abstract class ServiceBuilder {
 
     @ContributesAndroidInjector
-    abstract WifiService bindNetworkService();
+    abstract WifiP2pService bindNetworkService();
 
 }

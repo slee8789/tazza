@@ -4,8 +4,10 @@ package com.leesc.tazza.ui.lobby;
 import android.content.Context;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -14,10 +16,20 @@ import com.leesc.tazza.data.DataManager;
 import com.leesc.tazza.data.model.Room;
 import com.leesc.tazza.di.provider.ResourceProvider;
 import com.leesc.tazza.receiver.WifiDirectReceiver;
-import com.leesc.tazza.service.WifiService;
+import com.leesc.tazza.service.WifiP2pService;
 import com.leesc.tazza.ui.base.BaseViewModel;
 import com.leesc.tazza.utils.rx.RxEventBus;
 import com.leesc.tazza.utils.rx.SchedulerProvider;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+
+import io.reactivex.Completable;
+import io.reactivex.Observable;
 
 public class LobbyViewModel extends BaseViewModel<LobbyNavigator> {
 
@@ -25,14 +37,14 @@ public class LobbyViewModel extends BaseViewModel<LobbyNavigator> {
     private Context context;
     private WifiP2pManager wifiP2pManager;
     private WifiP2pManager.Channel channel;
-    private WifiService wifiService;
+    private WifiP2pService wifiP2pService;
 
     public LobbyViewModel(DataManager dataManager,
                           SchedulerProvider schedulerProvider,
                           Context context,
                           WifiP2pManager wifiP2pManager,
                           WifiP2pManager.Channel channel,
-                          WifiService wifiService,
+                          WifiP2pService wifiP2pService,
                           WifiDirectReceiver wifiDirectReceiver,
                           ResourceProvider resourceProvider) {
 
@@ -41,7 +53,7 @@ public class LobbyViewModel extends BaseViewModel<LobbyNavigator> {
         this.schedulerProvider = schedulerProvider;
         this.wifiP2pManager = wifiP2pManager;
         this.channel = channel;
-        this.wifiService = wifiService;
+        this.wifiP2pService = wifiP2pService;
 
         discover();
 
@@ -60,7 +72,7 @@ public class LobbyViewModel extends BaseViewModel<LobbyNavigator> {
         );
 
         getCompositeDisposable().add(RxEventBus.getInstance().getEvents(Room.class)
-                .subscribeOn(schedulerProvider.ui())
+                .subscribeOn(schedulerProvider.io())
                 .subscribe(
                         room -> {
                             Log.d("lsc", "LobbyViewModel room info " + ((Room) room).deviceName + ", " + ((Room) room).deviceAddress);
@@ -79,6 +91,18 @@ public class LobbyViewModel extends BaseViewModel<LobbyNavigator> {
                             });
                         }
                 ));
+
+        getCompositeDisposable().add(RxEventBus.getInstance().getEvents(WifiP2pInfo.class)
+                .filter(info -> !(((WifiP2pInfo) info).isGroupOwner))
+                //Todo : 서버 소켓 옵저버블 변환...
+                .subscribeOn(schedulerProvider.io())
+                .subscribe(
+                        info -> {
+                            Log.d("lsc", "LobbyViewModel info " + info);
+                            enterRoom(((WifiP2pInfo) info).groupOwnerAddress, 8080);
+                        }
+                )
+        );
 
     }
 
@@ -100,6 +124,65 @@ public class LobbyViewModel extends BaseViewModel<LobbyNavigator> {
 
     public void goToRoomInfo() {
         getNavigator().goToRoomInfoActivity();
+    }
+
+    public void enterRoom(InetAddress roomAddress, int roomPort) {
+        Log.d("lsc", "enterRoom " + roomAddress);
+        getCompositeDisposable()
+                .add(clientThreadObservable(roomAddress, roomPort)
+                        .subscribeOn(schedulerProvider.io())
+                        .observeOn(schedulerProvider.io())
+                        .subscribe(onNext -> {
+                            Log.d("lsc", "enterRoom onNext " + onNext);
+//                            Toast.makeText(context, onNext, Toast.LENGTH_SHORT).show();
+                        }, onError -> {
+                            Log.d("lsc", "enterRoom onError " + onError.getMessage());
+                        }, () -> {
+                            Log.d("lsc", "enterRoom terminated");
+                        }));
+    }
+
+    DataInputStream streamByServer;
+    DataOutputStream streamToServer;
+
+    private Observable<String> clientThreadObservable(InetAddress serverIp, int serverPort) {
+        return Observable.create(subscriber -> {
+            Log.d("lsc", "clientThreadObservable create");
+
+            try {
+                Socket socket = new Socket();
+                socket.connect(new InetSocketAddress(serverIp, serverPort), 30000);
+                streamByServer = new DataInputStream(socket.getInputStream());
+                streamToServer = new DataOutputStream(socket.getOutputStream());
+
+                while (socket != null) {
+                    try {
+                        subscriber.onNext(streamByServer.readUTF());
+                    } catch (IOException e) {
+                        subscriber.onError(e);
+                    }
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+//            Socket socket = new Socket(serverIp, serverPort);
+//            String messageFromServer;
+//            streamByServer = new DataInputStream(socket.getInputStream());
+//            streamToServer = new DataOutputStream(socket.getOutputStream());
+//            messageFromServer = streamByServer.readUTF();
+//            subscriber.onNext(messageFromServer);
+        });
+    }
+
+    public void sendMessage() {
+        try {
+            streamToServer.writeUTF("messageByClient");
+        } catch (IOException e) {
+            getNavigator().handleError(e);
+        }
     }
 
     @Override

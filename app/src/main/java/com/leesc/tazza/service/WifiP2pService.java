@@ -17,43 +17,43 @@ import javax.inject.Inject;
 import androidx.annotation.Nullable;
 import dagger.android.AndroidInjection;
 
-public class WifiService extends Service implements WifiP2pManager.ChannelListener, WifiP2pManager.PeerListListener, WifiP2pManager.ConnectionInfoListener {
+public class WifiP2pService extends Service implements WifiP2pManager.ChannelListener, WifiP2pManager.PeerListListener, WifiP2pManager.ConnectionInfoListener {
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("lsc", "WifiService onCreate");
+        Log.d("lsc", "WifiP2pService onCreate");
         AndroidInjection.inject(this);
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d("lsc", "WifiService onBind");
+        Log.d("lsc", "WifiP2pService onBind");
         return null;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("lsc", "WifiService onStartCommand");
+        Log.d("lsc", "WifiP2pService onStartCommand");
         return super.onStartCommand(intent, flags, startId);
     }
 
 
     @Override
     public void onChannelDisconnected() {
-        Log.d("lsc", "WifiService onChannelDisconnected");
+        Log.d("lsc", "WifiP2pService onChannelDisconnected");
     }
 
     @Override
     public void onConnectionInfoAvailable(WifiP2pInfo info) {
-        Log.d("lsc", "WifiService onConnectionInfoAvailable " + info.groupOwnerAddress + ", isGroupOwner " + info.isGroupOwner + ", wifiP2pInfo.groupFormed " + info.groupFormed);
+        Log.d("lsc", "WifiP2pService onConnectionInfoAvailable " + info.groupOwnerAddress + ", isGroupOwner " + info.isGroupOwner + ", wifiP2pInfo.groupFormed " + info.groupFormed);
         RxEventBus.getInstance().sendEvent(info);
     }
 
     @Override
     public void onPeersAvailable(WifiP2pDeviceList peers) {
-        Log.d("lsc", "WifiService onPeersAvailable");
+        Log.d("lsc", "WifiP2pService onPeersAvailable");
         RxEventBus.getInstance().sendEvent(peers);
     }
 }

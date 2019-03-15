@@ -51,14 +51,26 @@ public class RoomInfoViewModel extends BaseViewModel<RoomInfoNavigator> {
         this.resourceProvider = resourceProvider;
 
         getCompositeDisposable().add(RxEventBus.getInstance().getEvents(WifiP2pInfo.class)
-                .subscribeOn(schedulerProvider.io())
-                .subscribe(
-                        info -> {
-                            Log.d("lsc", "RoomInfoViewModel info " + info);
+                        .filter(info -> ((WifiP2pInfo) info).groupFormed && ((WifiP2pInfo) info).isGroupOwner)
+                        //Todo : 서버 소켓 옵저버블 변환...
+                        .subscribeOn(schedulerProvider.io())
+                        .subscribe(
+                                info -> {
+                                    Log.d("lsc", "RoomInfoViewModel info " + info);
+//                            serverThreadObservable(8080)
+//                                    .subscribeOn(schedulerProvider.io())
+//                                    .observeOn(schedulerProvider.ui())
+//                                    .subscribe(onNext -> {
+//                                        Log.d("lsc", "RoomInfoViewModel makeRoom onNext " + onNext);
+//                                        Toast.makeText(context, onNext, Toast.LENGTH_SHORT).show();
+//                                    }, onError -> {
+//                                        Log.d("lsc", "RoomInfoViewModel makeRoom onError " + onError.getMessage());
+//                                    }, () -> {
+//                                        Log.d("lsc", "RoomInfoViewModel makeRoom terminated");
+//                                    });
 
-
-                        }
-                )
+                                }
+                        )
         );
     }
 
@@ -97,6 +109,21 @@ public class RoomInfoViewModel extends BaseViewModel<RoomInfoNavigator> {
         });
     }
 
+    public void createSocket() {
+        getCompositeDisposable().add(serverThreadObservable(8080)
+                .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.ui())
+                .subscribe(onNext -> {
+                    Log.d("lsc", "RoomInfoViewModel createSocket onNext " + onNext);
+                    Toast.makeText(context, onNext, Toast.LENGTH_SHORT).show();
+                }, onError -> {
+                    Log.d("lsc", "RoomInfoViewModel createSocket onError " + onError.getMessage());
+                }, () -> {
+                    Log.d("lsc", "RoomInfoViewModel createSocket terminated");
+                })
+        );
+    }
+
     public void removeGroup() {
         wifiP2pManager.removeGroup(channel, new WifiP2pManager.ActionListener() {
             @Override
@@ -108,6 +135,19 @@ public class RoomInfoViewModel extends BaseViewModel<RoomInfoNavigator> {
             public void onFailure(int reason) {
                 Log.d("lsc", "RoomInfoViewModel removeGroup onFailure " + reason);
             }
+        });
+    }
+
+    public void sendMessage() {
+
+    }
+
+    private Observable<String> serverThreadObservable(int roomPort) {
+        return Observable.create(subscriber -> {
+            Log.d("lsc", "serverThreadObservable create");
+            ServerSocket serverSocket = new ServerSocket(roomPort);
+            ServerThread serverThread = new ServerThread(serverSocket);
+            new Thread(serverThread).start();
         });
     }
 

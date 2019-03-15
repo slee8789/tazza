@@ -8,7 +8,7 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.util.Log;
 
-import com.leesc.tazza.service.WifiService;
+import com.leesc.tazza.service.WifiP2pService;
 
 import dagger.android.AndroidInjection;
 
@@ -17,19 +17,19 @@ public class WifiDirectReceiver extends BroadcastReceiver {
 
     private WifiP2pManager wifiP2pManager;
     private WifiP2pManager.Channel channel;
-    private WifiService wifiService;
+    private WifiP2pService wifiP2pService;
     private WifiP2pDevice wifiP2pDevice;
 
-    public WifiDirectReceiver(WifiP2pManager wifiP2pManager, WifiP2pManager.Channel channel, WifiService wifiService) {
+    public WifiDirectReceiver(WifiP2pManager wifiP2pManager, WifiP2pManager.Channel channel, WifiP2pService wifiP2pService) {
         this.wifiP2pManager = wifiP2pManager;
         this.channel = channel;
-        this.wifiService = wifiService;
+        this.wifiP2pService = wifiP2pService;
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         AndroidInjection.inject(this, context);
-//        Intent serviceIntent = new Intent(context, WifiService.class);
+//        Intent serviceIntent = new Intent(context, WifiP2pService.class);
 //        serviceIntent.setAction(intent.getAction());
 //        serviceIntent.putExtras(intent);
 //        context.startService(serviceIntent);
@@ -48,7 +48,7 @@ public class WifiDirectReceiver extends BroadcastReceiver {
             case WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION:
                 Log.d("lsc", "WifiDirectReceiver WIFI_P2P_PEERS_CHANGED_ACTION");
                 if (wifiP2pManager != null) {
-                    wifiP2pManager.requestPeers(channel, wifiService);
+                    wifiP2pManager.requestPeers(channel, wifiP2pService);
                 }
                 break;
 
@@ -59,7 +59,7 @@ public class WifiDirectReceiver extends BroadcastReceiver {
                 NetworkInfo networkInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
                 Log.d("lsc", "WifiDirectReceiver networkInfo " + networkInfo.isConnected());
                 if (networkInfo.isConnected()) {
-                    wifiP2pManager.requestConnectionInfo(channel, wifiService);
+                    wifiP2pManager.requestConnectionInfo(channel, wifiP2pService);
                 } else {
                     Log.d("lsc", "WifiDirectReceiver disconnect");
                 }

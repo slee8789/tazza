@@ -23,7 +23,7 @@ import android.net.wifi.p2p.WifiP2pManager;
 import com.leesc.tazza.data.DataManager;
 import com.leesc.tazza.di.provider.ResourceProvider;
 import com.leesc.tazza.receiver.WifiDirectReceiver;
-import com.leesc.tazza.service.WifiService;
+import com.leesc.tazza.service.WifiP2pService;
 import com.leesc.tazza.utils.rx.SchedulerProvider;
 
 import dagger.Module;
@@ -38,10 +38,10 @@ public class LobbyActivityModule {
                                          Context context,
                                          WifiP2pManager wifiP2pManager,
                                          WifiP2pManager.Channel channel,
-                                         WifiService wifiService,
+                                         WifiP2pService wifiP2pService,
                                          WifiDirectReceiver wifiDirectReceiver,
                                          ResourceProvider resourceProvider
     ) {
-        return new LobbyViewModel(dataManager, schedulerProvider, context, wifiP2pManager, channel, wifiService, wifiDirectReceiver, resourceProvider);
+        return new LobbyViewModel(dataManager, schedulerProvider, context, wifiP2pManager, channel, wifiP2pService, wifiDirectReceiver, resourceProvider);
     }
 }

@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
 
-import com.leesc.tazza.service.WifiService;
+import com.leesc.tazza.service.WifiP2pService;
 
 public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
 
@@ -25,7 +25,7 @@ public class WifiDirectBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent serviceIntent = new Intent(context, WifiService.class);
+        Intent serviceIntent = new Intent(context, WifiP2pService.class);
         serviceIntent.setAction(intent.getAction());
         serviceIntent.putExtras(intent);
         context.startService(serviceIntent);

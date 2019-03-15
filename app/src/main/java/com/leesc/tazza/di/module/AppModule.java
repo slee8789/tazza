@@ -16,7 +16,7 @@ import com.leesc.tazza.data.local.prefs.PreferencesHelper;
 import com.leesc.tazza.di.provider.ResourceProvider;
 import com.leesc.tazza.di.quailfier.PreferenceInfo;
 import com.leesc.tazza.receiver.WifiDirectReceiver;
-import com.leesc.tazza.service.WifiService;
+import com.leesc.tazza.service.WifiP2pService;
 import com.leesc.tazza.utils.rx.AppSchedulerProvider;
 import com.leesc.tazza.utils.rx.SchedulerProvider;
 
@@ -73,8 +73,8 @@ public class AppModule {
 
     @Provides
     @Singleton
-    WifiService provideNetworkService() {
-        return new WifiService();
+    WifiP2pService provideNetworkService() {
+        return new WifiP2pService();
     }
 
     @Provides
@@ -83,13 +83,13 @@ public class AppModule {
     }
 
     @Provides
-    WifiP2pManager.Channel provideWifiP2pManagerChannel(WifiP2pManager wifiP2pManager, Context context, WifiService wifiService) {
-        return wifiP2pManager.initialize(context, context.getMainLooper(), wifiService);
+    WifiP2pManager.Channel provideWifiP2pManagerChannel(WifiP2pManager wifiP2pManager, Context context, WifiP2pService wifiP2pService) {
+        return wifiP2pManager.initialize(context, context.getMainLooper(), wifiP2pService);
     }
 
     @Provides
-    WifiDirectReceiver provideWifiDirectReceiver(WifiP2pManager wifiP2pManager, WifiP2pManager.Channel channel, WifiService wifiService) {
-        return new WifiDirectReceiver(wifiP2pManager, channel, wifiService);
+    WifiDirectReceiver provideWifiDirectReceiver(WifiP2pManager wifiP2pManager, WifiP2pManager.Channel channel, WifiP2pService wifiP2pService) {
+        return new WifiDirectReceiver(wifiP2pManager, channel, wifiP2pService);
     }
 
     @Provides

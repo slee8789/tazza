@@ -34,7 +34,7 @@
 
         <activity android:name=".ui.roominfo.RoomInfoActivity" />
 
-        <service android:name=".service.WifiService" />
+        <service android:name=".service.WifiP2pService" />
 
     </application>
 

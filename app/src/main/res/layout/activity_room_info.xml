@@ -35,5 +35,23 @@
             app:layout_constraintStart_toEndOf="@id/btn_create_group"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <Button
+            android:id="@+id/btn_create_socket"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{() -> viewModel.createSocket()}"
+            android:text="CreateSocket"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btn_create_group" />
+
+        <Button
+            android:id="@+id/btn_send_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{() -> viewModel.sendMessage()}"
+            android:text="메세지보내기 (to Client)"
+            app:layout_constraintStart_toEndOf="@id/btn_create_socket"
+            app:layout_constraintTop_toBottomOf="@id/btn_create_group" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
